@@ -16,12 +16,10 @@ export default class Feedback extends Component {
   };
 
   countTotalFeedback = () =>
-    this.state.good + this.state.neutral + this.state.bad;
+    Object.values(this.state).reduce((acc, item) => acc + item);
 
   countPositiveFeedbackPercentage = () =>
-    (this.state.good /
-      (this.state.good + this.state.neutral + this.state.bad)) *
-    100;
+    (this.state.good / (this.countTotalFeedback() || 1)) * 100;
 
   render() {
     const { good, neutral, bad } = this.state;
@@ -30,24 +28,25 @@ export default class Feedback extends Component {
       countTotalFeedback,
       countPositiveFeedbackPercentage,
     } = this;
-
+    const total = countTotalFeedback();
+    const options = Object.keys(this.state);
     return (
       <>
         <Section title="Please leave feedback">
           <FeedbackOptions
-            options={Object.keys(this.state)}
+            options={options}
             onLeaveFeedback={onLeaveFeedback}
           />
         </Section>
         <Section title="Statistics">
-          {isNaN(countPositiveFeedbackPercentage()) ? (
-            <Notification message="There is no feedback"></Notification>
+          {!total ? (
+            <Notification message="There is no feedback" />
           ) : (
             <Statistics
               good={good}
               neutral={neutral}
               bad={bad}
-              total={countTotalFeedback()}
+              total={total}
               positivePercentage={countPositiveFeedbackPercentage()}
             />
           )}
